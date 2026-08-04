@@ -117,6 +117,8 @@ void TCPWrap::Initialize(Local<Object> target,
   SetProtoMethod(isolate, t, "setKeepAlive", SetKeepAlive);
   SetProtoMethod(isolate, t, "setTypeOfService", SetTypeOfService);
   SetProtoMethod(isolate, t, "getTypeOfService", GetTypeOfService);
+  SetProtoMethod(isolate, t, "getBufferSize", GetBufferSize);
+  SetProtoMethod(isolate, t, "setBufferSize", SetBufferSize);
   SetProtoMethod(isolate, t, "reset", Reset);
 
 #ifdef _WIN32
@@ -154,6 +156,8 @@ void TCPWrap::RegisterExternalReferences(ExternalReferenceRegistry* registry) {
   registry->Register(SetKeepAlive);
   registry->Register(SetTypeOfService);
   registry->Register(GetTypeOfService);
+  registry->Register(GetBufferSize);
+  registry->Register(SetBufferSize);
   registry->Register(Reset);
 #ifdef _WIN32
   registry->Register(SetSimultaneousAccepts);
@@ -219,6 +223,70 @@ void TCPWrap::SetKeepAlive(const FunctionCallbackInfo<Value>& args) {
   if (args[3]->IsUint32()) count = args[3].As<Uint32>()->Value();
   int err = uv_tcp_keepalive_ex(&wrap->handle_, enable, delay, interval, count);
   args.GetReturnValue().Set(err);
+}
+
+void TCPWrap::GetBufferSize(const FunctionCallbackInfo<Value>& args) {
+  Environment* env = Environment::GetCurrent(args);
+  TCPWrap* wrap;
+  ASSIGN_OR_RETURN_UNWRAP(
+      &wrap, args.This(), args.GetReturnValue().Set(UV_EBADF));
+
+  CHECK(args[0]->IsBoolean());
+  bool is_recv = args[0].As<Boolean>()->Value();
+  const char* uv_func_name = is_recv ? "uv_recv_buffer_size" :
+                                       "uv_send_buffer_size";
+
+  uv_handle_t* handle = reinterpret_cast<uv_handle_t*>(&wrap->handle_);
+  // A size of 0 makes libuv query the current value.
+  int size = 0;
+  int err;
+
+  if (is_recv)
+    err = uv_recv_buffer_size(handle, &size);
+  else
+    err = uv_send_buffer_size(handle, &size);
+
+  if (err != 0) {
+    USE(env->CollectUVExceptionInfo(args[1], err, uv_func_name));
+    return;
+  }
+
+  args.GetReturnValue().Set(size);
+}
+
+void TCPWrap::SetBufferSize(const FunctionCallbackInfo<Value>& args) {
+  Environment* env = Environment::GetCurrent(args);
+  TCPWrap* wrap;
+  ASSIGN_OR_RETURN_UNWRAP(
+      &wrap, args.This(), args.GetReturnValue().Set(UV_EBADF));
+
+  CHECK(args[0]->IsUint32());
+  CHECK(args[1]->IsBoolean());
+  bool is_recv = args[1].As<Boolean>()->Value();
+  const char* uv_func_name = is_recv ? "uv_recv_buffer_size" :
+                                       "uv_send_buffer_size";
+
+  if (!args[0]->IsInt32()) {
+    USE(env->CollectUVExceptionInfo(args[2], UV_EINVAL, uv_func_name));
+    return;
+  }
+
+  uv_handle_t* handle = reinterpret_cast<uv_handle_t*>(&wrap->handle_);
+  int size = static_cast<int>(args[0].As<Uint32>()->Value());
+  CHECK_GT(size, 0);
+  int err;
+
+  if (is_recv)
+    err = uv_recv_buffer_size(handle, &size);
+  else
+    err = uv_send_buffer_size(handle, &size);
+
+  if (err != 0) {
+    USE(env->CollectUVExceptionInfo(args[2], err, uv_func_name));
+    return;
+  }
+
+  args.GetReturnValue().Set(size);
 }
 
 // TODO(amyssnippet): This implementation uses raw setsockopt/getsockopt calls

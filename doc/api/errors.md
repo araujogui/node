@@ -2937,8 +2937,9 @@ An attempt was made to bind a socket that has already been bound.
 
 ### `ERR_SOCKET_BAD_BUFFER_SIZE`
 
-An invalid (negative) size was passed for either the `recvBufferSize` or
-`sendBufferSize` options in [`dgram.createSocket()`][].
+An invalid size was passed for either the `recvBufferSize` or `sendBufferSize`
+options in [`dgram.createSocket()`][], or to
+[`net.Socket.setRecvBufferSize()`][] or [`net.Socket.setSendBufferSize()`][].
 
 <a id="ERR_SOCKET_BAD_PORT"></a>
 
@@ -2957,8 +2958,9 @@ value.
 
 ### `ERR_SOCKET_BUFFER_SIZE`
 
-While using [`dgram.createSocket()`][], the size of the receive or send `Buffer`
-could not be determined.
+The size of the receive or send `Buffer` could not be determined or set. This
+can happen while using [`dgram.createSocket()`][], or when reading or setting
+the receive or send buffer size of a [`net.Socket`][].
 
 <a id="ERR_SOCKET_CLOSED"></a>
 
@@ -4694,6 +4696,8 @@ An error occurred trying to allocate memory. This should never happen.
 [`https`]: https.md
 [`libuv Error handling`]: https://docs.libuv.org/en/v1.x/errors.html
 [`net.Server`]: net.md#class-netserver
+[`net.Socket.setRecvBufferSize()`]: net.md#socketsetrecvbuffersizesize
+[`net.Socket.setSendBufferSize()`]: net.md#socketsetsendbuffersizesize
 [`net.Socket.write()`]: net.md#socketwritedata-encoding-callback
 [`net.Socket`]: net.md#class-netsocket
 [`net`]: net.md

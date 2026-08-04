@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "nodejs-core": {
+      "source": "mcollina/skills",
+      "sourceType": "github",
+      "skillPath": "skills/nodejs-core/SKILL.md",
+      "computedHash": "5b49f42919feddb2d1258338e7e84856ff941ca8f9fa92b009bce18d0cf504cf"
+    }
+  }
+}

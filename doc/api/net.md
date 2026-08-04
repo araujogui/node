@@ -1340,6 +1340,50 @@ server will still send some data.
 
 See [`writable.end()`][] for further details.
 
+### `socket.getRecvBufferSize()`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+* Returns: {integer|undefined} The `SO_RCVBUF` socket receive buffer size in
+  bytes.
+
+Returns the current size of the socket receive buffer. The operating system may
+clamp the requested size, or double it on Linux, so this value can differ from
+the one passed to [`socket.setRecvBufferSize()`][].
+
+Until [`socket.connect()`][] has been called, the socket has no underlying
+handle to query, and this method returns the size previously passed to
+[`socket.setRecvBufferSize()`][], or `undefined` if none was set.
+
+Throws [`ERR_SOCKET_BUFFER_SIZE`][] if the buffer size cannot be determined.
+
+This method is only supported on TCP sockets. Calling it on an IPC socket
+throws an [`ERR_INVALID_HANDLE_TYPE`][] error.
+
+### `socket.getSendBufferSize()`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+* Returns: {integer|undefined} The `SO_SNDBUF` socket send buffer size in
+  bytes.
+
+Returns the current size of the socket send buffer. The operating system may
+clamp the requested size, or double it on Linux, so this value can differ from
+the one passed to [`socket.setSendBufferSize()`][].
+
+Until [`socket.connect()`][] has been called, the socket has no underlying
+handle to query, and this method returns the size previously passed to
+[`socket.setSendBufferSize()`][], or `undefined` if none was set.
+
+Throws [`ERR_SOCKET_BUFFER_SIZE`][] if the buffer size cannot be determined.
+
+This method is only supported on TCP sockets. Calling it on an IPC socket
+throws an [`ERR_INVALID_HANDLE_TYPE`][] error.
+
 ### `socket.localAddress`
 
 <!-- YAML
@@ -1595,6 +1639,58 @@ to optimize throughput at the expense of latency.
 Passing `true` for `noDelay` or not passing an argument will disable Nagle's
 algorithm for the socket. Passing `false` for `noDelay` will enable Nagle's
 algorithm.
+
+### `socket.setRecvBufferSize(size)`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+* `size` {integer} A positive integer no greater than `2 ** 31 - 1`.
+* Returns: {net.Socket} The socket itself.
+
+Sets the `SO_RCVBUF` socket option, the maximum socket receive buffer in bytes.
+
+The operating system may clamp the requested size, or double it on Linux, so
+use [`socket.getRecvBufferSize()`][] to read back the size that was actually
+applied.
+
+`setRecvBufferSize()` may be called before [`socket.connect()`][]; the value is
+cached and applied once the connection is established. If it cannot be applied
+at that point, the socket emits an [`'error'`][] event with an
+[`ERR_SOCKET_BUFFER_SIZE`][] error rather than throwing.
+
+Throws an [`ERR_SOCKET_BAD_BUFFER_SIZE`][] error if `size` is not a positive
+integer within the range above.
+
+This method is only supported on TCP sockets. Calling it on an IPC socket
+throws an [`ERR_INVALID_HANDLE_TYPE`][] error.
+
+### `socket.setSendBufferSize(size)`
+
+<!-- YAML
+added: REPLACEME
+-->
+
+* `size` {integer} A positive integer no greater than `2 ** 31 - 1`.
+* Returns: {net.Socket} The socket itself.
+
+Sets the `SO_SNDBUF` socket option, the maximum socket send buffer in bytes.
+
+The operating system may clamp the requested size, or double it on Linux, so
+use [`socket.getSendBufferSize()`][] to read back the size that was actually
+applied.
+
+`setSendBufferSize()` may be called before [`socket.connect()`][]; the value is
+cached and applied once the connection is established. If it cannot be applied
+at that point, the socket emits an [`'error'`][] event with an
+[`ERR_SOCKET_BUFFER_SIZE`][] error rather than throwing.
+
+Throws an [`ERR_SOCKET_BAD_BUFFER_SIZE`][] error if `size` is not a positive
+integer within the range above.
+
+This method is only supported on TCP sockets. Calling it on an IPC socket
+throws an [`ERR_INVALID_HANDLE_TYPE`][] error.
 
 ### `socket.setTimeout(timeout[, callback])`
 
@@ -2432,6 +2528,9 @@ console.log('listening on', server.address().port);
 [`'timeout'`]: #event-timeout
 [`BoundSocket`]: #class-netboundsocket
 [`ERR_INVALID_ARG_VALUE`]: errors.md#err_invalid_arg_value
+[`ERR_INVALID_HANDLE_TYPE`]: errors.md#err_invalid_handle_type
+[`ERR_SOCKET_BAD_BUFFER_SIZE`]: errors.md#err_socket_bad_buffer_size
+[`ERR_SOCKET_BUFFER_SIZE`]: errors.md#err_socket_buffer_size
 [`ERR_SOCKET_HANDLE_ADOPTED`]: errors.md#err_socket_handle_adopted
 [`EventEmitter`]: events.md#class-eventemitter
 [`child_process.fork()`]: child_process.md#child_processforkmodulepath-args-options
@@ -2470,6 +2569,8 @@ console.log('listening on', server.address().port);
 [`socket.connecting`]: #socketconnecting
 [`socket.destroy()`]: #socketdestroyerror
 [`socket.end()`]: #socketenddata-encoding-callback
+[`socket.getRecvBufferSize()`]: #socketgetrecvbuffersize
+[`socket.getSendBufferSize()`]: #socketgetsendbuffersize
 [`socket.localAddress`]: #socketlocaladdress
 [`socket.pause()`]: #socketpause
 [`socket.resume()`]: #socketresume
@@ -2477,6 +2578,8 @@ console.log('listening on', server.address().port);
 [`socket.setKeepAlive()`]: #socketsetkeepalive
 [`socket.setKeepAlive(enable)`]: #socketsetkeepaliveenable-initialdelay-interval-count
 [`socket.setKeepAlive(options)`]: #socketsetkeepaliveoptions
+[`socket.setRecvBufferSize()`]: #socketsetrecvbuffersizesize
+[`socket.setSendBufferSize()`]: #socketsetsendbuffersizesize
 [`socket.setTimeout()`]: #socketsettimeouttimeout-callback
 [`socket.setTimeout(timeout)`]: #socketsettimeouttimeout-callback
 [`stream.getDefaultHighWaterMark()`]: stream.md#streamgetdefaulthighwatermarkobjectmode
