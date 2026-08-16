@@ -6,8 +6,7 @@ const { suite, test } = require('node:test');
 
 suite('manual transactions', () => {
   test('a transaction is committed', (t) => {
-    const db = new DatabaseSync(':memory:');
-    t.after(() => { db.close(); });
+    using db = new DatabaseSync(':memory:');
     const setup = db.exec(`
       CREATE TABLE data(
         key INTEGER PRIMARY KEY
@@ -33,8 +32,7 @@ suite('manual transactions', () => {
   });
 
   test('a transaction is rolled back', (t) => {
-    const db = new DatabaseSync(':memory:');
-    t.after(() => { db.close(); });
+    using db = new DatabaseSync(':memory:');
     const setup = db.exec(`
       CREATE TABLE data(
         key INTEGER PRIMARY KEY

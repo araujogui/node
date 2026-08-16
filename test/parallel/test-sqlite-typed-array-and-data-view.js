@@ -27,8 +27,7 @@ const TypedArrays = [
 suite('StatementSync with TypedArray/DataView', () => {
   for (const [displayName, TypedArray] of TypedArrays) {
     test(displayName, (t) => {
-      const db = new DatabaseSync(':memory:');
-      t.after(() => { db.close(); });
+      using db = new DatabaseSync(':memory:');
       db.exec('CREATE TABLE test (data BLOB)');
       // insert
       {
@@ -64,8 +63,7 @@ suite('StatementSync with ArrayBuffer and SharedArrayBuffer', () => {
 
   for (const [displayName, buffer] of buffers) {
     test(`${displayName} - anonymous binding`, (t) => {
-      const db = new DatabaseSync(':memory:');
-      t.after(() => { db.close(); });
+      using db = new DatabaseSync(':memory:');
       db.exec('CREATE TABLE test (data BLOB)');
       // insert
       {
@@ -92,8 +90,7 @@ suite('StatementSync with ArrayBuffer and SharedArrayBuffer', () => {
     });
 
     test(`${displayName} - named binding (object)`, (t) => {
-      const db = new DatabaseSync(':memory:');
-      t.after(() => { db.close(); });
+      using db = new DatabaseSync(':memory:');
       db.exec('CREATE TABLE test (data BLOB)');
       // insert
       {
